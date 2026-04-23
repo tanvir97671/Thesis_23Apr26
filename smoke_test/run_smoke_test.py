@@ -241,20 +241,33 @@ def step5_tokenize():
 
         os.chdir(original_cwd)
 
-        # Determine shape
-        if isinstance(preprocessed_chs, dict):
-            shapes = {k: np.array(v).shape for k, v in preprocessed_chs.items()}
-            log(f"  Tokenizer output (dict): {shapes}")
-        elif isinstance(preprocessed_chs, (list, tuple)):
-            log(f"  Tokenizer output: {len(preprocessed_chs)} items")
-            if len(preprocessed_chs) > 0:
-                first = np.array(preprocessed_chs[0])
-                log(f"  First item shape: {first.shape}")
-        else:
-            arr = np.array(preprocessed_chs)
-            log(f"  Tokenizer output shape: {arr.shape}")
+        # Record success BEFORE shape inspection (tokenization itself succeeded)
+        record("Tokenization", "PASS", f"scenario={SCENARIO_NAME}, {len(preprocessed_chs)} samples")
 
-        record("Tokenization", "PASS", f"scenario={SCENARIO_NAME}")
+        # Inspect shape (best-effort, non-fatal)
+        try:
+            if isinstance(preprocessed_chs, dict):
+                shapes = {k: np.array(v).shape for k, v in preprocessed_chs.items()}
+                log(f"  Tokenizer output (dict): {shapes}")
+            elif isinstance(preprocessed_chs, (list, tuple)):
+                log(f"  Tokenizer output: {len(preprocessed_chs)} items")
+                if len(preprocessed_chs) > 0:
+                    first = preprocessed_chs[0]
+                    if isinstance(first, (list, tuple)):
+                        # LWM format: [input_ids, masked_tokens, masked_pos]
+                        log(f"  Per-sample structure: {len(first)} elements")
+                        for i, elem in enumerate(first):
+                            arr = np.array(elem)
+                            log(f"    Element {i}: shape={arr.shape}, dtype={arr.dtype}")
+                    else:
+                        arr = np.array(first)
+                        log(f"  First item shape: {arr.shape}")
+            else:
+                arr = np.array(preprocessed_chs)
+                log(f"  Tokenizer output shape: {arr.shape}")
+        except Exception as inspect_err:
+            log(f"  (shape inspection skipped: {inspect_err})")
+
         return preprocessed_chs
     except Exception as e:
         try:
