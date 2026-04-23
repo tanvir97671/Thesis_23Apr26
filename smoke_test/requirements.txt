@@ -3,7 +3,7 @@
 
 torch>=2.2.0
 numpy>=1.24.0,<2.0.0
-DeepMIMOv3>=1.1.0
+DeepMIMOv3>=0.2.9
 huggingface_hub>=0.20.0
 tqdm>=4.65.0
 matplotlib>=3.7.0
