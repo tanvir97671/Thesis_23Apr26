@@ -11,8 +11,6 @@ Smoke Test: LWM Baseline on Lightning AI A100
 import os
 import sys
 import time
-import shutil
-import subprocess
 import traceback
 import numpy as np
 from pathlib import Path
@@ -75,7 +73,7 @@ def step1_gpu_check():
         record("CUDA available", "PASS", f"torch.cuda = True")
 
         dev = torch.cuda.get_device_name(0)
-        mem_gb = torch.cuda.get_device_properties(0).total_mem / (1024**3)
+        mem_gb = torch.cuda.get_device_properties(0).total_memory / (1024**3)
         record("GPU device", "PASS", f"{dev}, {mem_gb:.1f} GB")
 
         if mem_gb < MIN_GPU_MEM_GB:
@@ -228,8 +226,8 @@ def step4_import_lwm():
 # ===================================================================
 def step5_tokenize():
     log(f"STEP 5: Tokenize channel data ({SCENARIO_NAME})")
+    original_cwd = os.getcwd()
     try:
-        original_cwd = os.getcwd()
         os.chdir(LWM_DIR)
 
         from input_preprocess import tokenizer
@@ -305,9 +303,9 @@ def step6_slice(preprocessed_chs):
 # ===================================================================
 def step7_load_model():
     log("STEP 7: Load pre-trained LWM model on GPU")
+    original_cwd = os.getcwd()
     try:
         import torch
-        original_cwd = os.getcwd()
         os.chdir(LWM_DIR)
 
         from lwm_model import lwm as lwm_cls
@@ -347,9 +345,9 @@ def step7_load_model():
 # ===================================================================
 def step8_inference(sliced_data, model, device):
     log(f"STEP 8: Forward pass ({EMBEDDING_TYPE} embeddings)")
+    original_cwd = os.getcwd()
     try:
         import torch
-        original_cwd = os.getcwd()
         os.chdir(LWM_DIR)
 
         from inference import lwm_inference, create_raw_dataset
@@ -395,10 +393,10 @@ def step8_inference(sliced_data, model, device):
 # STEP 9: BASELINE NMSE COMPUTATION
 # ===================================================================
 def step9_nmse(sliced_data, model, device):
-    log("STEP 9: Baseline NMSE on masked channel reconstruction")
+    log("STEP 9: GPU sanity check (tensor ops on channel dimensions)")
+    original_cwd = os.getcwd()
     try:
         import torch
-        original_cwd = os.getcwd()
         os.chdir(LWM_DIR)
 
         from input_preprocess import tokenizer
@@ -428,14 +426,14 @@ def step9_nmse(sliced_data, model, device):
             log(f"  Reconstruction test: {n_samples} samples, shape={test_input.shape}")
 
         os.chdir(original_cwd)
-        record("NMSE baseline", "PASS", "sanity check complete")
+        record("NMSE sanity check", "PASS", "tensor ops on channel dims OK")
         return True
     except Exception as e:
         try:
             os.chdir(original_cwd)
         except Exception:
             pass
-        record("NMSE baseline", "FAIL", str(e))
+        record("NMSE sanity check", "FAIL", str(e))
         traceback.print_exc()
         return False
 
