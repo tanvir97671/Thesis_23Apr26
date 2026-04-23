@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Smoke test workspace (downloaded repos — large, do not commit)
+smoke_test/workspace/
+
+# Lightning AI
+.lightning/
+
+# Experiment outputs
+results/
+checkpoints/
+wandb/
+lightning_logs/
+
+# Data (downloaded at runtime)
+*.npy
+*.npz
+scenarios/
